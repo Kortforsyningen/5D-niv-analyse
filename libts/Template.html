@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta content="text/html; charset=ISO-8859-1"
+      http-equiv="Content-Type">
+    <title>TimeSeriesTemplate</title>
+  </head>
+  <body>
+    <h1>Analyse af bev&aelig;gelser:&nbsp; __title__</h1>
+    __JESSEN__ &nbsp; __RESTRICT__<br>
+    Genereret af: __VERSION__ , __DATE__&nbsp; <br>
+    <br>
+    <br>
+    <br>
+    <table style=" text-align: left; width: 100%;" border="0"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top; text-align: center;"><a
+              href="./THE_GRAPH"><img
+                onmouseout='document.images[0].src="./THE_GRAPH"'
+                style="border: 0px solid; width: 500px; height: 400px;"
+onmouseover='document.images[0].src="./THE_GRAPH_NO_LEGEND"' alt=""
+                src="./THE_GRAPH" border="0"></a><br>
+          </td>
+          <td style="vertical-align: top; text-align: center;"><a
+              href="./THE_MAP"><img alt="" src="./THE_MAP"
+                style="border: 0px solid; width: 500px; height: 400px;"
+onmouseover='document.images[1].src="./THE_MAP_NO_NAMES"'
+                onmouseout='document.images[1].src="./THE_MAP"'></a><br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    __T1__<br>
+    <table style=" text-align: left; width: 100%;" border="1"
+      cellpadding="2" cellspacing="2">
+      <tbody>
+        <tr>
+          <td style="vertical-align: top;">Punkt<br>
+          </td>
+          <td style="vertical-align: top;">Start<br>
+          </td>
+          <td style="vertical-align: top;">Slut<br>
+          </td>
+          <td style="vertical-align: top;">Antal m&aring;linger<br>
+          </td>
+          <td style="vertical-align: top;">bev&aelig;gelse [mm/&aring;r]<br>
+          </td>
+          <td style="vertical-align: top;">mf_bev [mm/&aring;r]<br>
+          </td>
+          <td style="vertical-align: top;">Signifikant trend?<br>
+          </td>
+          <td style="vertical-align: top;">Stabilitet<br>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <br>
+    Bev&aelig;gelsen er beregnet ved en v&aelig;gtet line&aelig;r
+    regression af punkterne (<a href="#Detaljerede_grafer:_">se
+      detaljerede grafer nedenfor</a>). Middelfejlen p&aring;
+    bev&aelig;gelsen er beregnet ved hj&aelig;lp af
+    stationsmiddelfejlen.<br>
+    Den beregnede line&aelig;re trend vurderes at v&aelig;re
+    signifikant, n&aring;r den i absolutv&aelig;rdi er st&oslash;rre end
+    2.5 gange middelfejl.<br>
+    Et punkt vurderes at v&aelig;re stabilt hvis punktets
+    bev&aelig;gelse kan overlejres en konstant, vandret linie indenfor
+    usikkerhederne (gange __STABILITY_SD_MULTIPLIER__) p&aring; de enkelte m&aring;linger + en
+    pr&aelig;defineret bagatelgr&aelig;nse p&aring; __IGNORE_LIMIT__ mm.<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">__SIM_TABLE_BEGIN__<br>
+    Similaritetsmatricen nedenfor udtrykker om de enkelte punkters
+    bev&aelig;gelse er sammenlignlig indenfor usikkerhederne p&aring; de
+    enkelte m&aring;linger + en bagatelgr&aelig;nse. En positiv
+    v&aelig;rdi indikerer at bev&aelig;gelserne er "ens" mens en negativ
+    v&aelig;rdi indikerer det modsatte. V&aelig;rdiernes
+    st&oslash;rrelse afh&aelig;nger af antallet af m&aring;linger. <br>
+    <h2>Similaritets-matrix:</h2>
+    __T2__<br>
+    <br>
+    <hr style="width: 100%; height: 2px;">__SIM_TABLE_END__<br>
+    <h2><a name="Detaljerede_grafer:_"></a>Detaljerede grafer:<br>
+    </h2>
+    __INSERT_LINKS_HERE__<br>
+    <br>
+    <br>
+  </body>
+</html>
