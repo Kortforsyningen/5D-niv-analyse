@@ -1,16 +1,17 @@
 #!/usr/bin/perl
 # LRH 2015 06 18
 # KALD: prog.pl <indfil> 
-
+## modified feb. 2019 MAJWS (brugbarinfo)
 #Besked ved kald uden parameter.
 if ( $#ARGV == -1 )
 {
-printf("\nDer skal angives en indfil, en bagatelgrænse og en signifikans grænse\n");
+printf("\nDer skal angives en indfil, en bagatelgrænse og en signifikansgrænse\n");
 printf("\nIndfilen er en liste med jessennumre.\n");
-printf("\nBagatelgrænsen bestemmer om et punkt defineres stabit\n"); 
-printf("eller ustabilt, signifikansgrænsen er middelfejlen\n"); 
-printf("på det enkelte punkt * 3, minimum udsving på den højeste\n");
-printf("og max udsving på den laveste, angiver spændet inden for hvilket,\n");
+printf("\nBagatelgrænsen bestemmer om et punkt defineres stabilt\n"); 
+printf("eller ustabilt. Signifikansgrænsen ganges med middelfejlen\n"); 
+printf("på det enkelte punkt, og resulterer i usikkerheden, som punktet har.\n");
+printf("Det er stabilt, sÃ lÃ¦nge punktet erindenfor denne usikkerhed. Minimum udsving på den højeste\n");
+printf("og maksimum udsving på den laveste, angiver spændet inden for hvilket,\n");
 printf("bagatelgrænsen ikke må overskrides.\n");
 printf("\nNB! Ved dannelsen af htmlfil peges der på eksakt sted i org-filstruktur\n\n");
 printf("\nEks: 5d_ana.pl liste 0.4 3 \n\n");
@@ -21,7 +22,7 @@ exit(0);
 $indfil  = $ARGV[0]; #Liste med jessen numre.
 $balimit  = $ARGV[1];#Bagatel grænse.
 $silimit  = $ARGV[2];#Signifikans grænse.Hvad middelfejlen på det enkelte punkt ganges med.
-#$stlimit  = $ARGV[3];#Stabilitets grænse.
+#$stlimit  = $ARGV[3];#Stabilitetsgrænse.
 
 ##############################################
 #Her laves mapper til de enkelte tidsserier.
@@ -88,7 +89,7 @@ while (<IN>) {
 $nf =  @li = split;
 if ( $nf == 1 )
 {
-printf( OUT "5d.py INDFILER/ts_%s.txt INDFILER/ts_%s_xy.txt -o %s -html -map -inc INC/%s_pkt.txt -ilim $balimit -sdi $silimit -log LOGFILER/%s.log\n", $li[0], $li[0], $li[0], $li[0], $li[0]);
+printf( OUT "5d.py INDFILER/ts_%s.txt INDFILER/ts_%s_xy.txt -o %s -html -map yes -inc INC/%s_pkt.txt -ilim $balimit -sdi $silimit -log LOGFILER/%s.log\n", $li[0], $li[0], $li[0], $li[0], $li[0]);
 }
 }
 
@@ -255,7 +256,13 @@ system("rm kontrol fast_* alle*\n");
 system("grep 'Unstable' LOGFILER/* > ustabile");
 
 
-#############################################################
+########################################
+#Brugbar info fra logfiler
+########################################
+
+system("grep -h '#' LOGFILER/* > brugbarinfo");
+
+##############################################################
 #Her laves xml fil til GM, hurtig zoom på de enkelte punkter.
 #############################################################
 
