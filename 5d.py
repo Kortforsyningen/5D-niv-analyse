@@ -2,6 +2,7 @@
 ##############################
 ## Nice 5D-timeseries report generator   ##
 ## simlk, sep. 2011  
+## modified feb. 2019 MAJWS
 ##############################
 TABLE_ROW="""<tr>
 <td style="vertical-align: top;">N__P__<br>
@@ -30,6 +31,9 @@ cellpadding="2" cellspacing="2">
 MATRIX_ENTRY="""<td style="vertical-align: top; text-align: center;">Punkt<br>
 </td>
 """
+#5D points per February 2019. To be updated for next run
+fivedpoints = ["G.I.2065","G.I.2109","G.I.2113","G.I.2114","G.I.2120","G.I.2123","G.I.2125","G.I.2127","G.I.2134","G.I.2135","G.I.2139","G.I.2141","G.I.2143","G.I.2144","G.I.2146","G.I.2148","G.I.2149","G.I.2150","G.I.2152","G.I.2154","G.I.2155","G.I.2156","G.I.2157","G.I.2158","G.I.2159","G.I.2160","G.I.2162","G.I.2164","G.I.2165","G.I.2190","G.I.2193","G.I.2194","G.I.2195","G.I.2196","G.I.2197","G.I.2198","G.I.2199","G.I.2200","G.I.2201","G.I.2202","G.I.2207","G.I.2210","G.I.2212","G.I.2213","G.I.2214","G.I.2215","G.I.2217","G.I.2218","G.I.2219","G.I.2220","G.I.2221","G.I.2222","G.I.2223","G.I.2224","G.I.2230","G.I.2232","G.I.2233","G.I.2234","G.I.2236","G.I.2237","G.I.2241","G.I.2242","G.I.2243","G.I.2244","G.I.2245","G.I.2246","G.I.2247","G.I.2248","G.I.2249","G.I.2250","G.I.2251","G.I.2252","G.I.2256","G.I.2257","G.I.2258","G.I.2259","G.I.2261","G.I.2264","G.I.2271","G.I.2274","G.I.2278","G.I.2281","G.I.2286","G.I.2288","G.I.2290","G.I.2294","G.I.2297","G.I.2300","G.I.2305","G.I.2308","G.I.2311","G.I.2312","G.I.2315","G.I.2318","G.I.2319","G.I.2320","G.I.2326","G.I.2330","G.I.2332","G.I.2336","G.I.2338","G.I.2349","G.I.2354","G.I.2355","G.I.2358","G.I.2361","G.I.2365","G.I.2367","G.I.2371","G.I.2372","G.I.2375","G.I.2377","G.I.2379","G.I.2381","G.I.2382","G.I.2385","G.I.2387","G.I.2390","G.I.2391"]
+
 #'codes' to locate insertion points in template....
 T1_MARK="__T1__"
 T2_MARK="__T2__"
@@ -59,30 +63,40 @@ DEBUG=False
 
 def PlotMany(stations,title="Time Series",save_name=None,legend=True):
     #Make a graph with all timeseries
+    global fivedpoints
     plt.ioff()
     plt.figure()
     nl=0
     plt.xticks(rotation=35)
-    COLORS=["red","blue","green","black","yellow","brown","pink"]
+    COLORS=["blue","green","black","yellow","brown","pink"]
     for station in stations.keys():
+    	#print(str(station))
         ts=stations[station]
+	print("This is ts for station: " + str(station))
+	print(ts)
         ts_dates=date2num(ts[:,0])
         z=ts[:,1].astype(np.float64)
         if ts.shape[0]>1:
-            color=COLORS[nl%len(COLORS)]
-            dz=z-z.mean()
-            plt.plot_date(ts_dates,dz,marker="+",label="_nolegend_",color=color)
-            plt.plot(ts_dates,dz,"-",label=station,color=color)
-            nl+=1
+	    if station in fivedpoints:
+		color="red"#The 5d point is red
+	    else:
+		color=COLORS[nl%len(COLORS)]#The other points are not red
+
+	    dz=(z-z.mean())*1000
+	    plt.plot_date(ts_dates,dz,marker="+",label="_nolegend_",color=color)
+	    plt.plot(ts_dates,dz,"-",label=station,color=color)
+	    nl+=1
     if title is not None:
         plt.title(title)
     plt.xlabel("Time")
-    plt.ylabel("dz [m]")
+    plt.ylabel("dz [mm]")
+    plt.ylim([-2,2])
     if legend:
         plt.legend()
     if save_name is None:
         plt.show()
     else:
+    	print(save_name)
         plt.savefig(save_name)
 
 def PlotDetailed(ts,a,b,title=None,save_name=None,ignore_limit=0,sd_interval=2.0):
@@ -91,7 +105,7 @@ def PlotDetailed(ts,a,b,title=None,save_name=None,ignore_limit=0,sd_interval=2.0
     plt.figure()
     if title is not None:
         plt.title(title)
-    #ts=np.array(ts) it os an array now! 
+    #ts=np.array(ts) it is an array now! 
     ts_dates=date2num(ts[:,0])
     z=ts[:,1].astype(np.float64)
     e=sd_interval*ts[:,2].astype(np.float64)
@@ -294,7 +308,7 @@ def main(args):
     c_xy=(max_xy+min_xy)*0.5
     buf=(max_xy-min_xy)*0.1
     p_xy=(max_xy-min_xy+buf)/map_size
-    pix=max(PIXMIN,p_xy.max()) #gst pixelsize
+    pix=max(PIXMIN,p_xy.max()) #get pixelsize
     xmax,ymax=c_xy+0.5*pix*map_size
     xmin,ymin=c_xy-0.5*pix*map_size
     #Construct map#
@@ -307,11 +321,14 @@ def main(args):
         wms_out=os.path.join(outdir,main_title+"_wms.png")
         OK=wms_simple.WMSmap(xmin,xmax,ymin,ymax,MAPW,MAPH,outname=wms_out)
         if OK:
+	    print("wms returned TRUE")
             im=plt.imread(wms_out)
             plt.imshow(im,extent=(xmin,xmax,ymin,ymax))
     plt.scatter(XY[:,0],XY[:,1],s=12)
     plt.xlabel("[m]")
     plt.ylabel("[m]")
+    plt.xlim([xmin, xmax])
+    plt.ylim([ymin, ymax])
     plt.savefig(map_name_no_names)
     for i in range(XY.shape[0]):
         plt.text(XY[i,0]+2*pix,XY[i,1]+2*pix,PLT_NAMES[i])
