@@ -66,10 +66,9 @@ onmouseover='document.images[1].src="./THE_MAP_NO_NAMES"'
     Den beregnede line&aelig;re trend vurderes at v&aelig;re
     signifikant, n&aring;r den i absolutv&aelig;rdi er st&oslash;rre end
     2.5 gange middelfejl.<br>
-    Et punkt vurderes at v&aelig;re stabilt hvis punktets
-    bev&aelig;gelse kan overlejres en konstant, vandret linie indenfor
-    usikkerhederne (gange __STABILITY_SD_MULTIPLIER__) p&aring; de enkelte m&aring;linger + en
-    pr&aelig;defineret bagatelgr&aelig;nse p&aring; __IGNORE_LIMIT__ mm.<br>
+    Et punkt vurderes at v&aelig;re stabilt hvis dz&#61;max_z-min_z er mindre end en bagatelgr&aelig;nse p&aring; __IGNORE_LIMIT__ mm, eller der for alle z-forskelle g&aelig;lder:
+    <br>
+    |z_i-z_j|&#60;__STABILITY_SD_MULTIPLIER__&times; sqrt(s_i^2 + s_j^2), hvor s_i, s_j er usikkerhederne på de enkelte m&aring;linger.
     <br>
     <hr style="width: 100%; height: 2px;">__SIM_TABLE_BEGIN__<br>
     Similaritetsmatricen nedenfor udtrykker om de enkelte punkters

@@ -51,12 +51,14 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import date2num
 import numpy as np
 from libts import ts, wms_simple
-PROGNAME="5d.py v. 0.11"
-PROGDATE="2015-03-09"
+PROGNAME="5d.py v. 0.2"
+PROGDATE="2015-08-19"
 TEMPLATE=os.path.join(os.path.dirname(__file__),"libts","Template.html")
 MAX_PTS=7 #maximal number of points for html....
 DEBUG=False
+
 def PlotMany(stations,title="Time Series",save_name=None,legend=True):
+    #Make a graph with all timeseries
     plt.ioff()
     plt.figure()
     nl=0
@@ -84,6 +86,7 @@ def PlotMany(stations,title="Time Series",save_name=None,legend=True):
         plt.savefig(save_name)
 
 def PlotDetailed(ts,a,b,title=None,save_name=None,ignore_limit=0,sd_interval=2.0):
+    #Make a detailed plot of a single timeseries
     plt.ioff()
     plt.figure()
     if title is not None:
@@ -127,6 +130,7 @@ def PlotDetailed(ts,a,b,title=None,save_name=None,ignore_limit=0,sd_interval=2.0
         plt.savefig(save_name)
 
 def Usage():
+    #OMG: why do we still use python26 on linux and do not have argparse...
     sys.stdout=sys.__stdout__
     msg="To run:\n%s <z_time_series> <point_locations> -inc <file_name_poi> -o <outdir>" %os.path.basename(sys.argv[0])
     msg+=" -html -log <file_name> -map -kurt"
@@ -149,6 +153,9 @@ def Usage():
     sys.exit()
 
 class RedirectStdout(object):
+    """
+    Class to redirect stdout to a file.
+    """
     def __init__(self,fp=None):
         self.fp=fp
     def write(self,text):
@@ -160,6 +167,7 @@ class RedirectStdout(object):
                 pass
 
 def main(args):
+    #OMG: argparing. Should really use argparse (python27)
     if len(args)<3:
         Usage()
     log_file=None
