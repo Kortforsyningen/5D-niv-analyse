@@ -1,6 +1,7 @@
 #################################
 ## NIV. Z-Time Series Analysis Module
 ## simlk, sep. 2011
+## modified feb. 2019 MAJWS (init, MyReader, POIReader, GetMotion)
 ##################################
 import numpy as np
 try:
@@ -22,6 +23,11 @@ TREND_SD_MULTIPLIER=2.5  #what factor to multiply standard deviation by for test
 DIST_DEP=0 #so really small for now!
 MAX_PTS=1000
 APRIORI_SD=1.5  #apriori std_dev - used if sd not given
+
+# List of 5d points in db pr February 2019. Update the list for next run.
+fivedpoints = ["G.I.2065","G.I.2109","G.I.2113","G.I.2114","G.I.2120","G.I.2123","G.I.2125","G.I.2127","G.I.2134","G.I.2135","G.I.2139","G.I.2141","G.I.2143","G.I.2144","G.I.2146","G.I.2148","G.I.2149","G.I.2150","G.I.2152","G.I.2154","G.I.2155","G.I.2156","G.I.2157","G.I.2158","G.I.2159","G.I.2160","G.I.2162","G.I.2164","G.I.2165","G.I.2190","G.I.2193","G.I.2194","G.I.2195","G.I.2196","G.I.2197","G.I.2198","G.I.2199","G.I.2200","G.I.2201","G.I.2202","G.I.2207","G.I.2210","G.I.2212","G.I.2213","G.I.2214","G.I.2215","G.I.2217","G.I.2218","G.I.2219","G.I.2220","G.I.2221","G.I.2222","G.I.2223","G.I.2224","G.I.2230","G.I.2232","G.I.2233","G.I.2234","G.I.2236","G.I.2237","G.I.2241","G.I.2242","G.I.2243","G.I.2244","G.I.2245","G.I.2246","G.I.2247","G.I.2248","G.I.2249","G.I.2250","G.I.2251","G.I.2252","G.I.2256","G.I.2257","G.I.2258","G.I.2259","G.I.2261","G.I.2264","G.I.2271","G.I.2274","G.I.2278","G.I.2281","G.I.2286","G.I.2288","G.I.2290","G.I.2294","G.I.2297","G.I.2300","G.I.2305","G.I.2308","G.I.2311","G.I.2312","G.I.2315","G.I.2318","G.I.2319","G.I.2320","G.I.2326","G.I.2330","G.I.2332","G.I.2336","G.I.2338","G.I.2349","G.I.2354","G.I.2355","G.I.2358","G.I.2361","G.I.2365","G.I.2367","G.I.2371","G.I.2372","G.I.2375","G.I.2377","G.I.2379","G.I.2381","G.I.2382","G.I.2385","G.I.2387","G.I.2390","G.I.2391"]
+
+# Function definition starts. These are called through 5d.py
 def NoLog(text):
     print text
 LOG_METHOD=NoLog
@@ -70,7 +76,7 @@ def KurtReader(f,poi=None,min_y=None,max_y=None): #returns SORTED ts
             badlines+=1
         else:
             try:
-                station=sline[0]
+                station=sline[0].replace("/", "-")
                 y=float(sline[1])
                 x=float(sline[2])
                 z=float(sline[3])
@@ -124,7 +130,7 @@ def MyReader(f,poi=None,max_pts=10000,min_y=None,max_y=None): #returns SORTED ts
         if Jessen is None and "jessen" in line.lower():
             Jessen=sline[1]
         elif len(sline)>2 and sline[0][0]!="#":
-            station=sline[0]
+            station=sline[0].replace("/", "-")  #MWS Replace slash like in POIReader
             try:
                 z=float(sline[1])
             except:
@@ -209,7 +215,8 @@ def POIReader(f):
         sline=line.split()
         if len(sline)>0 and sline[0][0]!="#":
             station=sline[0].strip()
-            if len(sline)>1 and "5d" in sline[1]:
+	    station = station.replace("/", "-")   #MWS: try to filter the stations out where slash is used
+	    if len(sline)>1 and "5d" in sline[1]:
                 d5=station
             poi.append(station)
         line=f.readline()
@@ -255,15 +262,24 @@ def GetMotions(z_file,xy_file=None,inclusion_file=None,format="KMS",min_y=None,m
             LOG_METHOD("%s marked as 5d-point." %d5point)
     else:
         poi=None
+    
     if format=="KMS":
         stations,Jessen=MyReader(z_file,poi=poi,max_pts=MAX_PTS,min_y=min_y,max_y=max_y)
         xy=MyXYReader(xy_file)
     else:
         stations,xy=KurtReader(z_file,poi,min_y=min_y,max_y=max_y)
         Jessen=None
+    
     LOG_METHOD("Found %i stations in time series, and %i stations with (x,y) coords." %(len(stations),len(xy)))
-    LOG_METHOD("Jessen pkt. is %s" %Jessen)
+    LOG_METHOD("Jessen point is %s" %Jessen)
+    
+    for station in stations:
+        if station in fivedpoints:
+	    LOG_METHOD("#Jessen point is %s and 5d point is %s" %(Jessen,station))
+	    break
+
     LOG_METHOD("Using ignore limit %.3f mm and error multiplier/interval %.2f in stability test." %(IGNORE_LIMIT,STABILITY_SD_MULTIPLIER))
+    
     if min_y is not None:
         LOG_METHOD("Restricting to dates after %d-01-01" %min_y)
     if max_y is not None:
@@ -306,10 +322,10 @@ def GetMotions(z_file,xy_file=None,inclusion_file=None,format="KMS",min_y=None,m
                 C=np.dot(H,ts[:,1].reshape((ts.shape[0],1))) #coeff estimate....
                 b=C[0,0]
                 a=C[1,0]
-                #trivial matrix caluculations reduces the simple (NO a posteori) error propagation result to this
+                #trivial matrix caluculations reduces the simple (NO a posteriori) error propagation result to this
                 # Notice: NO depency on goodness of fit - only depends on input variances and distribution of times.
                 __sa=np.sqrt(Q[1,1])
-                #Now caluculate the a-posteori variance estimate, which takes "goodness of fit" into account
+                #Now caluculate the a-posteriori variance estimate, which takes "goodness of fit" into account
                 #Should be the same as in an unweighted regression if all input weights are the same....
                 #Hmmm - what is minimized is the weighted distance - TODO: take this into account
                 res=ts[:,1]-(ts[:,0]*a+b)
@@ -326,8 +342,9 @@ def GetMotions(z_file,xy_file=None,inclusion_file=None,format="KMS",min_y=None,m
                 sa=__sa*scale_sigma
                 if DEBUG and ts.shape[0]>2:
                     _a,_b,_sa=OldSchool(ts)
-                    print "Unweighted: ", _a,_sa," Weighted: ",a,sa," No-aposteori: ",__sa
+                    print "Unweighted: ", _a,_sa," Weighted: ",a,sa," No-aposteriori: ",__sa
                 if abs(a)>TREND_SD_MULTIPLIER*sa:
+		    print("The sa is: " + str(sa))
                     signif=True
                     ntrend+=1
                     ntrend_p+=(a>0)
@@ -368,15 +385,16 @@ def GetMotions(z_file,xy_file=None,inclusion_file=None,format="KMS",min_y=None,m
         else:
             extra_info="."
         if has_motion: #we include motions with only two measurements -. just because we typically don't have a lot of data....
-            LOG_METHOD("Station: %-16s, motion: %.4f mm/year, measured %i times, stable: %5s" %(station,a,ts.shape[0],stable)+extra_info)
+            LOG_METHOD("#Station: %-16s, motion: %.4f mm/year, measured %i times, stable: %5s" %(station,a,ts.shape[0],stable)+extra_info)
         elif ts.shape[0]<2:
-            LOG_METHOD("Station: %-16s, insufficent number of measurements." %station)
+            LOG_METHOD("#Station: %-16s, insufficent number of measurements." %station)
         else:
-            LOG_METHOD("Station: %-16s, no significant motion, stable: %5s" %(station,stable)+extra_info)
+            LOG_METHOD("#Station: %-16s, no significant motion, measured %i times, stable: %5s" %(station,ts.shape[0],stable)+extra_info)
         attrs[station]=[tmin,tmax,ts.shape[0],a,sa,signif,stable,a_plot,b_plot,corr_coeff]
     ls="*"*60
     LOG_METHOD("%s\n#Unstable points:         %i" %(ls,nunstable))
     LOG_METHOD("#Points with sign. trend: %i" %(ntrend))
+    LOG_METHOD("#")
     if (ntrend_p!=ntrend) and (ntrend_p>0):
         LOG_METHOD("WARNING: %i points with positive trend and %i with negative trend." %(ntrend_p,ntrend-ntrend_p))
     LOG_METHOD("%s" %ls)
